@@ -37,8 +37,17 @@ var config = {
 
       {
         test: /\.js$/,
-        loader: 'babel-loader',
-        include: [resolve('src')]
+        // loader: 'babel-loader',
+        // include: [resolve('src')],
+        use: [
+          {
+            loader: 'babel-loader',
+            options: {
+              // presets: ['env'],
+              plugins: [require("babel-plugin-syntax-dynamic-import")]
+            }
+          }
+        ]
       },
       {
         test: /\.vue$/,
@@ -52,7 +61,7 @@ var config = {
   // This set of options is identical to the resolve property set above, 
   // but is used only to resolve webpack's loader packages. Default:
   resolveLoader: {
-    modules: [path.resolve(__dirname, "../node_modules")],
+    modules: [path.resolve(__dirname, "../node_modules/")],
     extensions: [".js", ".json"],
     mainFields: ["loader", "main"]
   },
@@ -69,7 +78,7 @@ var config = {
 
     // directories where to look for modules
 
-    extensions: [".js", ".json", ".jsx", ".css"],
+    extensions: [".js", ".json", ".jsx", ".css", ".vue"],
     // extensions that are used
 
     alias: {

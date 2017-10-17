@@ -21,4 +21,16 @@ export default {
   body {
     background: #eee;
   }
+  a {
+    margin: 0 10px;
+    &:link {
+      color: #a00909;
+    }
+    &:hover{
+      opacity: .6;
+    }
+    &:visited {
+      color: #a00909;
+    }
+  }
 </style>
