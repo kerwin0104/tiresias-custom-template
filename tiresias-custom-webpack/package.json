@@ -9,8 +9,15 @@
   "author": "kerwinzhang@foxmail.com",
   "license": "MIT",
   "dependencies": {
+    "babel-core": "^6.26.0",
+    "babel-loader": "^7.1.2",
     "cpr": "^2.2.0",
+    "less": "^3.0.0-alpha.3",
+    "less-loader": "^4.0.5",
     "opn": "^5.1.0",
-    "tiresias-webpack": "^0.0.5"
+    "tiresias-webpack": "^0.0.5",
+    "vue": "^2.5.2",
+    "vue-loader": "^13.3.0",
+    "vue-router": "^3.0.1"
   }
 }

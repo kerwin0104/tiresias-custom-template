@@ -1,5 +1,9 @@
 const path = require('path')
 
+function resolve (dir) {
+  return path.join(__dirname, '../..', dir)
+}
+
 var config = {
   entry: {},
 
@@ -31,22 +35,26 @@ var config = {
     rules: [
       // rules for modules (configure loaders, parser options, etc.)
 
-      // {
-      //   test: /\.html$/,
-      //   use: [
-      //     // apply multiple loaders and options
-      //     "htmllint-loader",
-      //     {
-      //       loader: "html-loader",
-      //       options: {
-      //         /* ... */
-      //       }
-      //     }
-      //   ]
-      // }
+      {
+        test: /\.js$/,
+        loader: 'babel-loader',
+        include: [resolve('src')]
+      },
+      {
+        test: /\.vue$/,
+        loader: "vue-loader"
+      }
     ],
 
     /* Advanced module configuration (click to show) */
+  },
+
+  // This set of options is identical to the resolve property set above, 
+  // but is used only to resolve webpack's loader packages. Default:
+  resolveLoader: {
+    modules: [path.resolve(__dirname, "../node_modules")],
+    extensions: [".js", ".json"],
+    mainFields: ["loader", "main"]
   },
 
   resolve: {
@@ -54,8 +62,11 @@ var config = {
     // (does not apply to resolving to loaders)
 
     modules: [
+      path.resolve(__dirname, '../node_modules'),
       "node_modules"
     ],
+
+
     // directories where to look for modules
 
     extensions: [".js", ".json", ".jsx", ".css"],
@@ -63,8 +74,7 @@ var config = {
 
     alias: {
       // a list of module name aliases
-
-      "module": "new-module",
+      '@': resolve('src')
       // alias "module" -> "new-module" and "module/path/file" -> "new-module/path/file"
 
       // modules aliases are imported relative to the current context
