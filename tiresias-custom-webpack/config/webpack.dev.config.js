@@ -11,7 +11,7 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const sourceRoot = path.join(__dirname, '../../')
 const webrootDir = path.join(os.tmpdir(), './webroot')
 
-const baseConfig = {
+const  baseConfig = {
   rootDir: sourceRoot,
   pageDir: 'src/pages',
   resourceDir: 'src/resources',
@@ -21,12 +21,13 @@ const baseConfig = {
 }
 
 // build config for common
-function buildConfig (callback) {
-  const rootDir = baseConfig.rootDir
-  const pageDir = path.join(rootDir, baseConfig.pageDir)
-  const resourceDir = path.join(rootDir, baseConfig.resourceDir)
-  const actionDir = path.join(rootDir, baseConfig.actionDir)
-  const staticDir = path.join(rootDir, baseConfig.staticDir)
+function buildConfig (callback, buildConfig) {
+  buildConfig = Object.assign({}, baseConfig, buildConfig)
+  const rootDir = buildConfig.rootDir
+  const pageDir = path.join(rootDir, buildConfig.pageDir)
+  const resourceDir = path.join(rootDir, buildConfig.resourceDir)
+  const actionDir = path.join(rootDir, buildConfig.actionDir)
+  const staticDir = path.join(rootDir, buildConfig.staticDir)
 
   const globPath = path.join(pageDir, './**/*.*')
 
@@ -40,7 +41,7 @@ function buildConfig (callback) {
       hints : false
     }
 
-    config.output.path = baseConfig.distDir
+    config.output.path = buildConfig.distDir
 
 
     rules.push(
@@ -84,7 +85,7 @@ function buildConfig (callback) {
     // clean dist dirctory
     plugins.push(
       new CleanWebpackPlugin(['*'], {
-          root: baseConfig.distDir,   //  clean build root
+          root: buildConfig.distDir,   //  clean build root
           verbose:  true,  　　       //  show detail 
           dry:      false  　　       //  only delete files
         }

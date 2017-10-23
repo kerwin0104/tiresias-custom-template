@@ -5,20 +5,11 @@ const opn = require('opn')
 const getWebpackConfig = require('../config/webpack.dev.config.js')
 const server = require('../../tiresias-custom-server/server.js')
 
-// dev server port
-const port = 9999
-
 // tmp dir build for server
 const webrootDir = path.join(os.tmpdir(), './webroot')
 
 // source build root
 const sourceRootDir = path.join(__dirname, '../../../src')
-
-// default config for dev server
-const defaultConfig = {}
-defaultConfig.port = port
-defaultConfig.rootDir = sourceRootDir
-defaultConfig.distDir = webrootDir
 
 // start server after first build end.
 var firstBuildEnd = false
@@ -31,7 +22,7 @@ function startServer (port) {
   server.start()
 }
 
-function compileAndServe () {
+function compileAndServe (port = 9999, buildConfig = {}) {
   getWebpackConfig(webpackConfig => {
     var compiler = tiresiasWebpack.exec(webpackConfig)
     compiler.watch({           // watch options:
@@ -60,7 +51,7 @@ function compileAndServe () {
     }); 
 
     console.log('building resource please wait...')
-  })
+  }, buildConfig)
 }
 
 // compileAndServe()
