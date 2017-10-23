@@ -47,6 +47,10 @@ function compileAndServe () {
             chunks: false,
             chunkModules: false
           }) + '\n')
+          var date = new Date
+          console.log(
+            `=> build end at: ${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`
+          )
           if (!firstBuildEnd) {
             startServer(port)
             opn('http://127.0.0.1:' + port)
@@ -59,6 +63,6 @@ function compileAndServe () {
   })
 }
 
-compileAndServe()
+// compileAndServe()
 
 module.exports = compileAndServe

@@ -33,8 +33,53 @@ function buildConfig (callback) {
   getWebpackgeBaseConfig(baseConfig, config => {
     const entry = config.entry || {}
     const plugins = config.plugins || []
+    const rules = config.module.rules || []
+    
+    // close asset size limit warning.
+    config.performance = {
+      hints : false
+    }
 
     config.output.path = baseConfig.distDir
+
+
+    rules.push(
+      {
+        test: /\.vue$/,
+        loader: "vue-loader",
+        options: {
+          loaders: {
+            js: 'babel-loader?presets[]=' + ["babel-preset-es2015"].map(require.resolve)
+          }
+        }
+      }
+    )
+
+    rules.push(
+      {
+        test: /\.(css|less)$/,
+        use: [
+          {loader: 'style-loader'},
+          {loader: 'css-loader'},
+          {loader: 'less-loader'}
+        ]
+      }
+    )
+
+    rules.push(
+      {
+        test: /\.(jpe?g|png|gif|svg)$/i,
+        use: [
+            {
+              loader: 'url-loader',
+              options: {
+                limit: 100,
+                name: 'resources/img/[name].[hash:7].[ext]'
+              }
+            }
+        ]
+      }
+    )
 
     // clean dist dirctory
     plugins.push(
@@ -76,20 +121,22 @@ function buildConfig (callback) {
                 path.dirname(relativeFilePath), 
                 './main.js'
             )
+            
+            let fileName = path.join(pathInfo.dir, pathInfo.name)
 
             fs.stat(scriptFile, (err, stat) => {
               // add to entry
               if (err) {
                 console.warn(`scripts: [${scriptFile }] not found`)
               } else {
-                entry[pathInfo.name] = scriptFile 
+                entry[fileName] = scriptFile 
               }
 
               // add to plugins
               plugins.push(
                 new HtmlWebpackPlugin({
                   inject: err ? false : true,
-                  chunks: err ? [] : [pathInfo.name],
+                  chunks: err ? [] : [fileName],
                   filename: path.join(
                       pathInfo.ext === '.html' ? 'htmls' : 'templates',
                       relativeFilePath
@@ -108,6 +155,7 @@ function buildConfig (callback) {
         .then(() => {
           config.entry = entry
           config.plugins = plugins
+          config.module.rules = rules
           callback(config)
         })
     })

@@ -37,22 +37,35 @@ var config = {
 
       {
         test: /\.js$/,
-        // loader: 'babel-loader',
-        // include: [resolve('src')],
+        include: [resolve('src')],
         use: [
           {
             loader: 'babel-loader',
             options: {
-              // presets: ['env'],
+              compact: false,
+              presets: ["babel-preset-es2015"].map(require.resolve),
               plugins: [require("babel-plugin-syntax-dynamic-import")]
             }
           }
         ]
       },
       {
-        test: /\.vue$/,
-        loader: "vue-loader"
+        test: /\.(mp4|webm|ogg|mp3|wav|flac|aac)(\?.*)?$/,
+        loader: 'url-loader',
+        options: {
+          limit: 100,
+          name: 'resources/media/[name].[hash:7].[ext]'
+        }
+      },
+      {
+        test: /\.(woff2?|eot|ttf|otf)(\?.*)?$/,
+        loader: 'url-loader',
+        options: {
+          limit: 100,
+          name: 'resources/fonts/[name].[hash:7].[ext]'
+        }
       }
+
     ],
 
     /* Advanced module configuration (click to show) */
@@ -83,7 +96,8 @@ var config = {
 
     alias: {
       // a list of module name aliases
-      '@': resolve('src')
+      '@': resolve('src'),
+      'vue$': 'vue/dist/vue.esm.js' // 'vue/dist/vue.common.js' for webpack 1
       // alias "module" -> "new-module" and "module/path/file" -> "new-module/path/file"
 
       // modules aliases are imported relative to the current context
@@ -121,19 +135,6 @@ var config = {
 
   stats: "errors-only",
   // lets you precisely control what bundle information gets displayed
-
-  // devServer: {
-  //   proxy: { // proxy URLs to backend development server
-  //     '/api': 'http://localhost:3000'
-  //   },
-  //   contentBase: path.join(__dirname, 'public'), // boolean | string | array, static file location
-  //   compress: true, // enable gzip compression
-  //   historyApiFallback: true, // true for index.html upon 404, object for multiple paths
-  //   hot: true, // hot module replacement. Depends on HotModuleReplacementPlugin
-  //   https: false, // true for self-signed, object for cert authority
-  //   noInfo: true, // only errors & warns on hot reload
-  //   // ...
-  // },
 
   plugins: [],
   // list of additional plugins

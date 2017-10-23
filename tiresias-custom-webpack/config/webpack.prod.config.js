@@ -3,9 +3,12 @@ const os = require('os')
 const path = require('path')
 const glob = require('glob')
 const fs = require('fs')
+const webpack = require('webpack')
 const CleanWebpackPlugin = require('clean-webpack-plugin')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
+const ExtractTextPlugin = require('extract-text-webpack-plugin')
+const OptimizeCSSPlugin = require('optimize-css-assets-webpack-plugin')
 
 // base config
 const sourceRoot = path.join(__dirname, '../../')
@@ -29,13 +32,114 @@ function buildConfig (callback) {
   const staticDir = path.join(rootDir, baseConfig.staticDir)
 
   const globPath = path.join(pageDir, './**/*.*')
-  console.log(globPath)
 
   getWebpackgeBaseConfig(baseConfig, config => {
     const entry = config.entry || {}
     const plugins = config.plugins || []
+    const rules = config.module.rules || []
 
     config.output.path = baseConfig.distDir
+    config.output.filename = "resources/js/[name].[hash].js", // string
+
+    // build rules for production
+    rules.push(
+      {
+        test: /\.vue$/,
+        loader: "vue-loader",
+        options: {
+          extractCSS: true,
+          loaders: {
+            js: 'babel-loader?presets[]=' + ["babel-preset-es2015"].map(require.resolve)
+          }
+        }
+      }
+    )
+    
+    rules.push(
+      {
+        test: /\.(css|less)$/,
+        use: ExtractTextPlugin.extract({
+          fallback: "style-loader",
+          use: [
+            "css-loader",
+            "less-loader"
+          ]
+        })
+      }
+    )
+
+    rules.push(
+      {
+        test: /\.(jpe?g|png|gif|svg)$/i,
+        use: [
+            {
+              loader: 'url-loader',
+              options: {
+                limit: 100,
+                name: 'resources/img/[name].[hash:7].[ext]'
+              }
+            },
+            {
+              loader: 'image-webpack-loader',
+              options: {
+                gifsicle: {
+                  interlaced: false,
+                },
+                optipng: {
+                  optimizationLevel: 7,
+                },
+                pngquant: {
+                  quality: '65-90',
+                  speed: 4
+                },
+                mozjpeg: {
+                  progressive: true,
+                  quality: 65
+                },
+                webp: {
+                  quality: 75
+                }
+              }
+            }
+        ]
+      }
+    )
+
+    // /build rules for production
+    
+    // build for production
+    plugins.push(
+      new webpack.DefinePlugin({
+        'process.env': {
+          NODE_ENV: JSON.stringify('production')
+        }
+      })
+    )
+
+    plugins.push(
+      new webpack.optimize.UglifyJsPlugin({
+        compress: {
+          warnings: false
+        },
+        sourceMap: true,
+        parallel: true
+      })
+    )
+
+    plugins.push(
+      new ExtractTextPlugin({
+        filename: 'resources/css/[name].[contenthash].css'
+      })
+    )
+
+    plugins.push(
+      new OptimizeCSSPlugin({
+        cssProcessorOptions: {
+          safe: true
+        }
+      })
+    )
+    // /build for product
 
     // clean dist dirctory
     plugins.push(
@@ -78,19 +182,21 @@ function buildConfig (callback) {
                 './main.js'
             )
 
+            let fileName = path.join(pathInfo.dir, pathInfo.name)
+
             fs.stat(scriptFile, (err, stat) => {
               // add to entry
               if (err) {
                 console.warn(`scripts: [${scriptFile }] not found`)
               } else {
-                entry[pathInfo.name] = scriptFile 
+                entry[fileName] = scriptFile 
               }
 
               // add to plugins
               plugins.push(
                 new HtmlWebpackPlugin({
                   inject: err ? false : true,
-                  chunks: err ? [] : [pathInfo.name],
+                  chunks: err ? [] : [fileName],
                   filename: path.join(
                       pathInfo.ext === '.html' ? 'htmls' : 'templates',
                       relativeFilePath
@@ -109,6 +215,7 @@ function buildConfig (callback) {
         .then(() => {
           config.entry = entry
           config.plugins = plugins
+          config.module.rules = rules
           callback(config)
         })
     })
